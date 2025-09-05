@@ -70,7 +70,8 @@ This proposal introduces the DiskPool Expansion feature to Mayastor pools of typ
     - For ex. 800GiB, 3.5TiB or 4563726394B. User will have to specify the unit. Otherwise we will fail the request as it creates ambiguity.
     - Our implementation uses binary storage units, so values are expected in MiB, GiB, or TiB rather than MB, GB, or TB.
   - **Factors**:
-    - For ex. "1x", "20x", "8x" or "5x". 5x will allow the Pool to be grown 5 times of it's initial capacity. If not specified, We default it to '1x'.
+    - For ex. "1x", "20x", "8x" or "5x". 5x will allow the Pool to be grown 5 times of it's initial capacity.
+  - These inputs gets converted into blobsore metadata reservation ratio. If not specified, we default it to 200. Which allows 2x growth from initial capacity.
 
 4. A New Pool/DSP status field
 
