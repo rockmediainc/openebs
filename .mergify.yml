@@ -1,0 +1,4 @@
+queue_rules:
+  - update_method: rebase
+    name: default
+    branch_protection_injection_mode: merge
