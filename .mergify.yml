@@ -1,4 +1,5 @@
 queue_rules:
-  - update_method: rebase
-    name: default
+  - name: default
+    update_method: rebase
+    allow_inplace_checks: true
     branch_protection_injection_mode: merge
