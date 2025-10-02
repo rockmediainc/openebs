@@ -3,3 +3,5 @@ queue_rules:
     update_method: rebase
     allow_inplace_checks: true
     branch_protection_injection_mode: merge
+merge_queue:
+  max_parallel_checks: 1
