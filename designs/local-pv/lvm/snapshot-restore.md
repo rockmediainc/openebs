@@ -40,15 +40,15 @@ OpenEBS LVM supports snapshots, but restoring from them is not supported. This l
 
 ## Non-Goals
 
-- Including support for restoring from snapshots of thick-provisioned volumes as part of this OEP.
+- Restoring from snapshots of thick-provisioned volumes.
 
 ## Proposal
 
-For restoring from snapshot of thin-provisioned volume, a new thin-provisioned snapshot is created from the existing snapshot. Since LVM snapshots are writable, these can be exposed as new PVCs without losing the original snapshot’s identity. This allows multiple restores from the same snapshot, resulting in multiple independent copies. The restored thin snapshot volumes are activated as Read-Write and presented to Kubernetes as PersistentVolume objects.
+For restoring from snapshot of thin-provisioned volume, a new thin-provisioned snapshot is created from the existing snapshot. Since LVM snapshots are writable, these can be exposed as new PVCs without losing the original snapshot’s identity. This allows multiple restores from the same snapshot, resulting in multiple independent copies. The restored thin snapshot volume is activated as Read-Write and presented to Kubernetes as PersistentVolume object.
 
-- Add two new fields to the LVM Snapshot CR: **`thin`** and **`sourceCapacity`**.
-    - **`thin`**: Indicates whether the snapshot was created from a thin-provisioned volume.  
-    - **`sourceCapacity`**: Records the capacity of the origin volume at the time the snapshot was taken.
+- Add two new fields to the LVM Snapshot CR: **`thinSnapshot`** and **`sourceVolumeCapacity`**.
+    - **`thinSnapshot`**: Indicates whether the snapshot was created from a thin-provisioned volume.  
+    - **`sourceVolumeCapacity`**: Records the capacity of the origin volume at the time the snapshot was taken.
 - Add a new field **`source`** to the LVM Volume CR. It defines the data source for the volume.
     - Can be a **snapshot**  
     - Or an **existing volume**
@@ -57,12 +57,13 @@ For restoring from snapshot of thin-provisioned volume, a new thin-provisioned s
 
 ### Story 1
 
-As a user, I want to create restore from snapshot of thin-provisioned volume.
+As a user, I want to create a `PersistentVolumeClaim` from a `VolumeSnapshot` of a thin-provisioned volume.
 
 
 ## Implementation Details
 
 ### Design
+
 - With LVM Thin Pools, snapshot of snapshot can be writable and used as lightweight clones.
 - Common blocks in nested snapshots are stored once in the thin pool, so snapshot chains can grow without limits or performance loss.
 - To restore a PVC from LVM snapshot of thin-provisoned volume, a new thin-provisioned snapshot is created from the existing snapshot. Since LVM snapshots are inherently writable, this snapshot can be exposed to the user as a volume for a new PVC.
@@ -71,28 +72,30 @@ As a user, I want to create restore from snapshot of thin-provisioned volume.
 - Writes to restored LV consume new blocks and Original snapshot remains point-in-time and read-only from Kubernetes perspective. This ensures multiple independent PVCs can be provisioned from a single snapshot safely.
 
 ### Workflow
-- User create PVC with data source as thin snapshot.
-- The **external-provisioner** kubernetes sidecar sends a CreateVolume gRPC call to OpenEBS LVM CSI driver.
-- This **CreateVolume** request containing a dataSource is received by the lvm-controller.
-- From the **CreateVolume** request, validate volume creation request
+
+1. User create PVC with data source as thin snapshot.
+2. The **external-provisioner** kubernetes sidecar sends a CreateVolume gRPC call to OpenEBS LVM CSI driver.
+3. This **CreateVolume** request containing a dataSource is received by the lvm-controller.
+4. From the **CreateVolume** request, validate volume creation request
     - If **req.VolumeContentSource** is nil, proceed as normal OpenEBS LVM volume creation.
     - On the other hand, the Volume creation request might have a data source as either a Snapshot or Persistent Volume.
-    - If data source is snapshot then create volume with datasource as snapshot.
     - Validate request whether snapshot is thin or thick , if snapshot is thick then return not supported error.
     - Validate LVM vg , owner node and capacity of CreateVolume request.
-- OpenEBS LVM driver updates openEBS lvm volume CR with snapshot name, node name, vg name, capacity, thinProvision values.
-- **lvm-node** on the target node finds the earlier created restore volume lvmvolume CR with snapshot as source.
-- **lvm-node** sends a volume create request to create a thin-snapshot from the thin-snapshot
+    - If data source is snapshot then create volume with datasource as snapshot.
+5. OpenEBS LVM controller creates lvm volume CR with snapshot name, node name, vgpattern,volGroup, capacity, thinProvision values.
+6. **lvm-node** on the target node finds the earlier created restore volume lvmvolume CR with snapshot as source.
+7. **lvm-node** sends a volume create request to create a thin-snapshot from the thin-snapshot
     - Backend (LVM) could internally:
         - Creates thin snapshot of snapshot
             - ```lvcreate -s -n openebs-lvm-restore-lv lvmvg/openebs-lvm-thin-snapshot```
         - Activates above snapshot with Read-Write permissions which will be restored LV
             - ```lvchange -kn -ay lvmvg/openebs-lvm-restore-lv```
-- **lvm-node** updates the status of restored LVM Volume CR
-- **lvm-controller** finds the updated status of restored LVM Volume CR
-- **lvm-controller** sends the success (or failure) to provisioner sidecar.
+8. **lvm-node** updates the status of restored LVM Volume CR
+9. **lvm-controller** finds the updated status of restored LVM Volume CR
+10. **lvm-controller** sends the success (or failure) to provisioner sidecar.
 
 ### OpenEBS lvmsnapshot CR
+
 ```yaml
 apiVersion: local.openebs.io/v1alpha1
 kind: LVMSnapshot
@@ -112,6 +115,7 @@ status:
 ```
 
 ### Restore from Snapshot
+
 ***restore-pvc.yaml***
 ```yaml
 kind: PersistentVolumeClaim
@@ -132,6 +136,7 @@ spec:
 ```
 
 ### OpeneEBS lvmvolume CR for restore
+
 ```yaml
 apiVersion: local.openebs.io/v1alpha1
 kind: LVMVolume
@@ -148,16 +153,18 @@ status:
 ```
 
 ### Risks and Mitigations
+
 - Enable **thin_pool_autoextend_threshold** and **thin_pool_autoextend_percent** in **lvm.conf**. Prevents write failures when thin pool fills. Ensure Volume Group (VG) has spare capacity, otherwise auto-extend won’t help.
 
 
 ## Testing
+
 - Restore from a thin snapshot.  
-- Restore from a thick snapshot.  
-- Attempt restore using a non-existent snapshot.  
-- Restore on a different node than the snapshot’s origin.  
-- Restore from a snapshot belonging to a different volume group (VG).  
+- Restore from a thick snapshot — operation should fail.  
+- Restore using a non-existent snapshot — operation should fail.  
+- Restore from a snapshot belonging to a different volume group (VG) — operation should fail.  
 - Expand a restored volume created from a thin snapshot.  
-- Create a restored PVC with capacity greater than the origin volume at snapshot time.  
-- Create a restored PVC with capacity smaller than the origin volume at snapshot time.  
+- Attempt to create a restored PVC with capacity greater than the source volume at snapshot time — operation should fail.  
+- Attempt to create a restored PVC with capacity smaller than the source volume at snapshot time — operation should fail.  
 - Delete the snapshot after performing a restore.
+- Restore from snapshot as a thick volume - operation should fail.
