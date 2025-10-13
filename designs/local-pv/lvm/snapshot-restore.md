@@ -7,8 +7,8 @@ owners:
   - "@rohan2794"
 editor: TBD
 creation-date: 03/10/2025
-last-updated: 09/10/2025
-status: provisional
+last-updated: 13/10/2025
+status: implementable
 ---
 
 # Add Snapshot Restore Feature to OpenEBS LVM
@@ -56,9 +56,9 @@ OpenEBS LVM supports snapshots, but restoring from them is not supported. This l
 
 For restoring from snapshot of thin-provisioned volume, a new snapshot LV is created from an existing thin snapshot LV. Since LVM snapshots are writable, these can be exposed as new PVCs without losing the original snapshot’s identity. This allows multiple restores from the same snapshot, resulting in multiple independent copies. The restored thin snapshot volume is activated as Read-Write and presented to Kubernetes as PersistentVolume object.
 
-- Add two new fields to the LVM Snapshot CR: **`thinSnapshot`** and **`sourceVolumeCapacity`**.
+- Add two new fields to the LVM Snapshot CR: **`thinSnapshot`** and **`snapOriginVolumeCapacity`**.
     - **`thinSnapshot`**: Indicates whether the snapshot was created from a thin-provisioned volume.  
-    - **`sourceVolumeCapacity`**: Records the capacity of the origin volume at the time the snapshot was taken.
+    - **`snapOriginVolumeCapacity`**: Records the capacity of the origin volume at the time the snapshot was taken.
 - Add a new field **`source`** to the LVM Volume CR. It defines the data source for the volume.
     - Can be a **snapshot**  
     - Or an **existing volume**
@@ -96,7 +96,7 @@ As a user, I want to create a `PersistentVolumeClaim` from a `VolumeSnapshot` of
     - If data source is snapshot then create volume with datasource as snapshot.
 5. OpenEBS LVM controller creates lvm volume CR with snapshot name, node name, vgpattern,volGroup, capacity, thinProvision values.
 6. **lvm-node** on the target node finds the earlier created restore volume lvmvolume CR with snapshot as source.
-7. **lvm-node** sends a volume create request to create a new thin snapshot LV from the source thin snapshot LV
+7. **lvm-node** issues a volume create request to create a new thin snapshot LV from the source thin snapshot LV
     - Backend (LVM) could internally:
         - Creates thin snapshot of snapshot
             - ```lvcreate -s -n openebs-lvm-restore-lv lvmvg/openebs-lvm-thin-snapshot```
@@ -104,7 +104,7 @@ As a user, I want to create a `PersistentVolumeClaim` from a `VolumeSnapshot` of
             - ```lvchange -kn -ay lvmvg/openebs-lvm-restore-lv```
 8. **lvm-node** updates the status of restored LVM Volume CR
 9. **lvm-controller** finds the updated status of restored LVM Volume CR
-10. **lvm-controller** sends the success (or failure) to provisioner sidecar.
+10. **lvm-controller** complete create_volume request with success (or failure)
 
 #### Workflow Diagram
 
@@ -147,7 +147,7 @@ sequenceDiagram
     Backend-->>Node: Report LVM LV creation status
     Node->>Node: Update status of restored <br>LVM Volume CR
     Controller->>Controller: Find updated status of LVM Volume CR
-    Controller-->>Provisioner: Send success/failure response
+    Controller-->>Provisioner: Complete Request with success/failure response
     Provisioner-->>K8sAPI: Forward response
     K8sAPI-->>User: Return result
 ```
