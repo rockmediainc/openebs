@@ -7,7 +7,7 @@ owners:
   - "@rohan2794"
 editor: TBD
 creation-date: 03/10/2025
-last-updated: 14/10/2025
+last-updated: 28/10/2025
 status: implementable
 ---
 
@@ -56,9 +56,9 @@ OpenEBS LVM supports snapshots, but restoring from them is not supported. This l
 
 For restoring from snapshot of thin-provisioned volume, a new snapshot LV is created from an existing thin snapshot LV. Since LVM snapshots are writable, these can be exposed as new PVCs without losing the original snapshot’s identity. This allows multiple restores from the same snapshot, resulting in multiple independent copies. The restored thin snapshot volume is activated as Read-Write and presented to Kubernetes as PersistentVolume object.
 
-- Add two new fields to the LVM Snapshot CR: **`thin`** and **`snapOriginVolumeCapacity`**.
-    - **`thin`**: Indicates whether the snapshot was created from a thin-provisioned volume.  
-    - **`snapOriginVolumeCapacity`**: Records the capacity of the origin volume at the time the snapshot was taken.
+- Add two new fields to the LVM Snapshot CR: **`thinProvision`** and **`lvSize`**.
+    - **`thinProvision`**: Indicates whether the snapshot was created from a thin-provisioned volume.  
+    - **`lvSize`**: Records the capacity of the snapshot LV.
 - Add a new field **`source`** to the LVM Volume CR. It defines the data source for the volume.
     - Can be a **snapshot**  
     - Or an **existing volume**
@@ -99,7 +99,7 @@ As a user, I want to create a `PersistentVolumeClaim` from a `VolumeSnapshot` of
 7. **lvm-node** issues a volume create request to create a new thin snapshot LV from the source thin snapshot LV
     - Backend (LVM) could internally:
         - Creates thin snapshot of snapshot
-            - ```lvcreate -s -n openebs-lvm-restore-lv lvmvg/openebs-lvm-thin-snapshot```
+            - ```lvcreate -s -n <restore-volume-name>  lvmvg/<thin-snapshot-name> -y --wipesignatures n```
         - Activates above snapshot with Read-Write permissions which will be restored LV
             - ```lvchange -kn -ay lvmvg/openebs-lvm-restore-lv```
 8. **lvm-node** updates the status of restored LVM Volume CR
@@ -160,17 +160,23 @@ sequenceDiagram
 apiVersion: local.openebs.io/v1alpha1
 kind: LVMSnapshot
 metadata:
-  name: snapshot-0e1967eb-471d-4a7e-93b1-ba92d53c7a2a # lvm snapshot cr name
+  creationTimestamp: "2025-10-27T09:44:16Z"
+  finalizers:
+  - lvm.openebs.io/finalizer
+  generation: 2
+  labels:
+    kubernetes.io/nodename: worker-node-1
+    openebs.io/persistent-volume: pvc-dca183ae-4096-48fc-bf08-740d1c03d583
+  name: snapshot-cc82975a-c652-41fa-892a-744eb04ccbd1
   namespace: openebs
+  resourceVersion: "285569"
+  uid: 840781e1-11e2-46af-b9de-eb88443e8cde
 spec:
-  ownerNodeID: node-0-397958
-  # origin volume capacity at the time of snapshot
-  snapOriginVolumeCapacity: "1073741824"
-  # 'thin' specifies type of snapshot, this field will be true 
-  # if snapshot is of thin-provisoned volume else it will be false
-  thin: true
+  ownerNodeID: worker-node-1
+  thinProvision: true
   volGroup: lvmvg
 status:
+  lvSize: 5Gi
   state: Ready
 ```
 
@@ -192,7 +198,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi # capacity of restored PVC
+      storage: 5Gi # capacity of restored PVC
 ```
 
 ### OpeneEBS lvmvolume CR for restore
@@ -201,18 +207,24 @@ spec:
 apiVersion: local.openebs.io/v1alpha1
 kind: LVMVolume
 metadata:
-  name: pvc-97e44bbf-e916-4fe4-bca0-04e5aabcba4e
+  creationTimestamp: "2025-10-27T09:44:21Z"
+  finalizers:
+  - lvm.openebs.io/finalizer
+  generation: 2
+  labels:
+    kubernetes.io/nodename: worker-node-1
+  name: pvc-e9c895c0-ddbc-44ea-8f90-7fe81ba723bb
   namespace: openebs
+  resourceVersion: "285588"
+  uid: 291635d5-1947-45f1-a607-fb6d363438d0
 spec:
-  capacity: "2147483648"
-  ownerNodeID: node-0-397958
+  capacity: "5368709120"
+  ownerNodeID: worker-node-1
   shared: "no"
-  # 'source' specifies source of volume
-  # it will be set if source is thin snapshot
-  source: snapshot-0e1967eb-471d-4a7e-93b1-ba92d53c7a2a
-  volGroup: lvmvg
+  source: snapshot-cc82975a-c652-41fa-892a-744eb04ccbd1 # source snapshot name
   thinProvision: "yes"
   vgPattern: ^lvmvg$
+  volGroup: lvmvg
 status:
   state: Ready
 ```
