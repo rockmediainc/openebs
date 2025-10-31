@@ -7,8 +7,8 @@ owners:
   - "@tiagolobocastro"
 editor: TBD
 creation-date: 28/02/2025
-last-updated: 07/07/2025
-status: implementable
+last-updated: 16/10/2025
+status: implemented
 ---
 
 # Cordon Mayastor Pools
