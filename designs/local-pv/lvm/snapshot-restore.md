@@ -8,7 +8,7 @@ owners:
 editor: TBD
 creation-date: 03/10/2025
 last-updated: 28/10/2025
-status: implementable
+status: implemented
 ---
 
 # Add Snapshot Restore Feature to OpenEBS LVM
