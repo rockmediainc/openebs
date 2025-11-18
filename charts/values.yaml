@@ -219,6 +219,9 @@ loki:
     replicas: 0
   bloomGateway:
     replicas: 0
+  sidecar:
+    image:
+      repository: docker.io/kiwigrid/k8s-sidecar
 
 alloy:
   enabled: true
