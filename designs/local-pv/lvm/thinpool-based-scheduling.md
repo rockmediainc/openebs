@@ -7,8 +7,8 @@ owners:
   - "@abhilashshetty04"
 editor: TBD
 creation-date: 2025-10-10
-last-updated: 2025-10-31
-status: implementable
+last-updated: 2025-11-04
+status: implemented
 ---
 
 # OpenEBS Enhancement Proposal for ThinPool based Scheduling
