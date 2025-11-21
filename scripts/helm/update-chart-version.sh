@@ -17,8 +17,9 @@ Options:
 
 Examples:
   $(basename "$0") --chart-version 1.2.3 --app-version 1.2.3  \
-                   --localpv-provisioner-version <version>  --zfs-localpv-version <version> \
-                   --lvm-localpv-version <version>  --mayastor-version <version>
+                   --localpv-provisioner-version 1.2.3  --zfs-localpv-version 1.2.3 \
+                   --lvm-localpv-version 1.2.3  --mayastor-version 1.2.3 \
+                   --rawfile-localpv-version 1.2.3
 EOF
 }
 
@@ -30,6 +31,7 @@ update_chart_yaml() {
   local LOCALPV_ZFS_VERSION=${4#v}
   local LOCALPV_LVM_VERSION=${5#v}
   local MAYASTOR_VERSION=${6#v}
+  local RAWFILE_LOCALPV_VERSION=${7#v}
 
   yq_ibl ".version = \"$VERSION\" | .appVersion = \"$APP_VERSION\"" "$CHART_YAML"
   yq_ibl "(.dependencies[] | select(.name == \"openebs-crds\") | .version) = \"$APP_VERSION\"" "$CHART_YAML"
@@ -38,6 +40,7 @@ update_chart_yaml() {
   yq_ibl "(.dependencies[] | select(.name == \"zfs-localpv\") | .version) = \"$LOCALPV_ZFS_VERSION\"" "$CHART_YAML"
   yq_ibl "(.dependencies[] | select(.name == \"lvm-localpv\") | .version) = \"$LOCALPV_LVM_VERSION\"" "$CHART_YAML"
   yq_ibl "(.dependencies[] | select(.name == \"mayastor\") | .version) = \"$MAYASTOR_VERSION\"" "$CHART_YAML"
+  yq_ibl "(.dependencies[] | select(.name == \"rawfile-localpv\") | .version) = \"$RAWFILE_LOCALPV_VERSION\"" "$CHART_YAML"
 }
 
 # Initialize variables
@@ -72,6 +75,7 @@ while [ "$#" -gt 0 ]; do
     --zfs-localpv-version) shift; LOCALPV_ZFS_VERSION=$1; shift ;;
     --lvm-localpv-version) shift; LOCALPV_LVM_VERSION=$1; shift ;;
     --mayastor-version) shift; MAYASTOR_VERSION=$1; shift ;;
+    --rawfile-localpv-version) shift; RAWFILE_LOCALPV_VERSION=$1; shift ;;
     *) help; log_fatal "Unknown option: $1" ;;
   esac
 done
@@ -82,12 +86,13 @@ validate_inputs() {
   [[ -z "$LOCALPV_ZFS_VERSION" ]] && log_fatal "Missing required input: --zfs-localpv-version"
   [[ -z "$LOCALPV_LVM_VERSION" ]] && log_fatal "Missing required input: --lvm-localpv-version"
   [[ -z "$MAYASTOR_VERSION" ]] && log_fatal "Missing required input: --mayastor-version"
+  [[ -z "$RAWFILE_LOCALPV_VERSION" ]] && log_fatal "Missing required input: --rawfile-localpv-version"
 }
 
 if [[ -n $VERSION ]]; then
    validate_inputs
   if [[ -z $DRY_RUN ]];then
-    update_chart_yaml "$VERSION" "$APP_VERSION" "$LOCALPV_HOSTPATH_VERSION" "$LOCALPV_ZFS_VERSION" "$LOCALPV_LVM_VERSION" "$MAYASTOR_VERSION"
+    update_chart_yaml "$VERSION" "$APP_VERSION" "$LOCALPV_HOSTPATH_VERSION" "$LOCALPV_ZFS_VERSION" "$LOCALPV_LVM_VERSION" "$MAYASTOR_VERSION" "$RAWFILE_LOCALPV_VERSION"
   else
     log "Dry run mode. The following versions would be used:"
     log "Chart Version:              $VERSION"
@@ -96,6 +101,7 @@ if [[ -n $VERSION ]]; then
     log "ZFS LocalPV:                $LOCALPV_ZFS_VERSION"
     log "LVM LocalPV:                $LOCALPV_LVM_VERSION"
     log "Mayastor:                   $MAYASTOR_VERSION"
+    log "Rawfile LocalPV:            $RAWFILE_LOCALPV_VERSION"
   fi
 else
    log_fatal "Failed to update the chart versions"
