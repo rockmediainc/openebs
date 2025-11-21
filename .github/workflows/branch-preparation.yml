@@ -11,6 +11,8 @@ on:
         required: true
       mayastor-version:
         required: true
+      rawfile-localpv-version:
+        required: true
       branch:
         required: true
       helm-version:
@@ -108,6 +110,7 @@ jobs:
             --localpv-provisioner-version ${LOCALPV_HOSTPATH_VERSION} \
             --zfs-localpv-version ${LOCALPV_ZFS_VERSION} \
             --lvm-localpv-version ${LOCALPV_LVM_VERSION} \
+            --rawfile-localpv-version ${LOCALPV_RAWFILE_VERSION} \
             --mayastor-version ${MAYASTOR_VERSION}" ./shell.nix
         env:
           VERSION: ${{ github.event.inputs.helm-version }}
@@ -115,6 +118,7 @@ jobs:
           LOCALPV_ZFS_VERSION: ${{ github.event.inputs.zfs-localpv-version }}
           LOCALPV_LVM_VERSION: ${{ github.event.inputs.lvm-localpv-version }}
           MAYASTOR_VERSION: ${{ github.event.inputs.mayastor-version }}
+          LOCALPV_RAWFILE_VERSION: ${{ github.event.inputs.rawfile-localpv-version }}
 
       - name: Pre-populate helm nix-shell
         run: nix-shell ./scripts/helm/shell.nix --run "echo"
