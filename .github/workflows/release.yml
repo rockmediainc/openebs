@@ -125,6 +125,7 @@ jobs:
           IMAGE_ORG: ${{ github.repository_owner }}
         run: |
           VERSION=${RAW_TAG#v}
+          echo "CHART_VERSION=$VERSION" >> $GITHUB_ENV
 
           rm -rf charts
           mkdir -p charts-staged charts-final charts
@@ -145,3 +146,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           charts_dir: .
+
+      - name: Publish openebs umbrella helm chart as OCI
+        uses: appany/helm-oci-chart-releaser@v0.4.2
+        with:
+          name: openebs
+          repository: ${{ github.repository_owner }}/charts
+          tag: ${{ env.CHART_VERSION }}
+          path: ./charts
+          registry: ghcr.io
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          update_dependencies: 'false'
