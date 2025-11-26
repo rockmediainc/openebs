@@ -32,7 +32,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}  
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Validate if the staging should be even made
         run: |
@@ -86,7 +86,7 @@ jobs:
 
       - name: Push kubectl binaries to GHCR
         run: |
-          nix-shell --pure --run "./scripts/staging/kubectl-oci.sh push\
+          nix-shell --pure --run "./scripts/staging/kubectl-oci.sh push \
             --tag ${TAG} \
             --namespace ${{ github.repository_owner }}/dev/plugin \
             --username ${{ github.actor }} \
@@ -115,7 +115,8 @@ jobs:
 
       - name: Update version for staging
         run: |
-          nix-shell --pure --run "./scripts/helm/update-version-upon-release.sh" ./scripts/helm/shell.nix
+          nix-shell --pure --run "./scripts/helm/update-version-upon-release.sh \
+            --tag ${TAG}" ./scripts/helm/shell.nix
 
       - name: Set Chart Version
         run: |
