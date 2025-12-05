@@ -65,7 +65,7 @@ jobs:
             nix-shell --pure --run "./scripts/helm/update-version-upon-release.sh" ./scripts/staging/shell.nix
             nix-shell --run "./scripts/release.sh --tag ${{ inputs.tag }} --registry ${{ inputs.registry }}/${{ inputs.namespace }}" ./scripts/staging/shell.nix
           elif [[ "${{ github.event_name }}" == "push" ]]; then
-            nix-shell --run './scripts/release.sh --tag $(yq '.appVersion' charts/Chart.yaml)' ./scripts/staging/shell.nix
+            nix-shell --run './scripts/release.sh --tag v$(yq '.appVersion' charts/Chart.yaml)' ./scripts/staging/shell.nix
           fi
       # debugging
       # - name: Setup tmate session
