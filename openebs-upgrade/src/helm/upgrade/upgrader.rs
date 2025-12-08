@@ -65,7 +65,7 @@ impl HelmUpgrader for UmbrellaUpgrader {
             // Mayastor was disabled by default for OpenEBS v3. If the chart is a v3 one and
             // there are no Etcd Pods, we disable the Etcd preUpgradeJob and perform a helm upgrade.
             // If we don't do this, the Etcd preUpgradeJob gets stuck trying to mount the Etcd
-            // JWT token. After helm helm upgrade, we perform a same version upgrade to the same
+            // JWT token. After helm upgrade, we perform a same version upgrade to the same
             // version (target version) again with the preUpgradeJob enabled, so that future
             // upgrades with helm upgrade --reuse-values and such flags don't keep the Etcd
             // preUpgradeJob disabled. Values for disabling the engines have changed since v3, so
@@ -103,7 +103,7 @@ impl HelmUpgrader for UmbrellaUpgrader {
                                 .into_iter()
                                 .chain(vec_to_strings!(
                                     "--set",
-                                    "mayastor.etcd.preUpgradeJob.enabled=false"
+                                    "mayastor.etcd.preUpgradeJob.enabled=true"
                                 ))
                                 .collect(),
                         ),

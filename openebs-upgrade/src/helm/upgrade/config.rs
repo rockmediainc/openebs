@@ -86,13 +86,13 @@ impl HelmUpgradeConfig {
                     .args_set_file
                     .map(|val| ["--set-file".to_string(), val]),
                 Some(["-f", temp_values_file.path().to_str().unwrap()].map(ToString::to_string)),
-                Some(["--atomic", "--reset-then-reuse-values"].map(ToString::to_string)),
             ]
             .into_iter()
             // Drop the None, unwrap the Some.
             .flatten()
             // Flatten the [String;2] into individual Strings.
             .flatten()
+            .chain(["--reset-then-reuse-values".to_string()])
             .collect(),
             temp_values_file,
             source_version,
