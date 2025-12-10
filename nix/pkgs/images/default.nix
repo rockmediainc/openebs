@@ -38,8 +38,8 @@ let
         patchShebangs build/mayastor/scripts/utils/log.sh
         patchShebangs build/mayastor/scripts/utils/yaml.sh
 
-        if [ -L build/chart/kubectl-openebs ]; then
-          rm build/chart/kubectl-openebs
+        if [ -L build/charts/kubectl-openebs ]; then
+          rm build/charts/kubectl-openebs
         fi
 
         # if tag is not semver just keep whatever is checked-in
