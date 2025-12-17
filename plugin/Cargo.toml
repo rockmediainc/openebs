@@ -26,22 +26,23 @@ upgrade = { path = "../mayastor/k8s/upgrade" }
 supportability = { path = "../mayastor/k8s/supportability" }
 openebs-upgrade = { path = "../openebs-upgrade" }
 constants = { path = "../mayastor/constants" }
-byte-unit = "4.0.19"
-bytes = "1.5.0"
-anyhow = "1.0.92"
-async-trait = "0.1.83"
-clap = { version = "4.5.20", features = ["color", "derive"] }
-k8s-openapi = { version = "0.22.0", features = ["v1_24"] }
-kube = { version = "0.94.2", features = ["derive", "runtime"] }
-lazy_static = "1.5.0"
-prettytable-rs = "0.10.0"
-serde = "1.0.214"
-serde_json = {version = "1.0.132"}
-serde_yaml = "0.9.34"
-snafu = "0.8.5"
-tokio = { version = "1.43.1", features=["full"] }
-base64 = "0.22.1"
-flate2 = "1.0.35"
-nu-ansi-term = "0.46.0"
-semver = "1.0.26"
-humantime = "2.1.0"
+
+byte-unit = { workspace = true }
+bytes = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+clap = { workspace = true, features = ["color", "derive"] }
+k8s-openapi = { workspace = true }
+kube = { workspace = true, features = ["derive", "runtime"] }
+lazy_static = { workspace = true }
+prettytable-rs = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+snafu = { workspace = true }
+tokio = { workspace = true }
+base64 = { workspace = true }
+flate2 = { workspace = true }
+nu-ansi-term = { workspace = true }
+semver = { workspace = true }
+humantime = { workspace = true }
