@@ -58,6 +58,11 @@ let
     "Cargo.toml"
     "plugin"
     "openebs-upgrade"
+    "mayastor/Cargo.toml"
+    "mayastor/k8s"
+    "mayastor/console-logger"
+    "mayastor/constants"
+    "mayastor/dependencies/control-plane/Cargo.toml"
     "mayastor/dependencies/control-plane/openapi/Cargo.toml"
     "mayastor/dependencies/control-plane/openapi/build.rs"
     "mayastor/dependencies/control-plane/openapi/src/lib.rs"
@@ -84,9 +89,6 @@ let
     "mayastor/dependencies/control-plane/rpc"
     "mayastor/dependencies/control-plane/k8s/forward"
     "mayastor/dependencies/control-plane/k8s/proxy"
-    "mayastor/k8s"
-    "mayastor/console-logger"
-    "mayastor/constants"
     "mayastor/dependencies/control-plane/k8s/operators"
   ];
   src = sourcer.whitelistSource ../../../. src_list;

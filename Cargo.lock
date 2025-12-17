@@ -234,8 +234,8 @@ dependencies = [
  "pin-project-lite",
  "rustversion",
  "serde",
- "sync_wrapper",
- "tower 0.5.2",
+ "sync_wrapper 1.0.2",
+ "tower 0.5.1",
  "tower-layer",
  "tower-service",
 ]
@@ -255,7 +255,7 @@ dependencies = [
  "mime",
  "pin-project-lite",
  "rustversion",
- "sync_wrapper",
+ "sync_wrapper 1.0.2",
  "tower-layer",
  "tower-service",
 ]
@@ -876,7 +876,6 @@ dependencies = [
  "bytes",
  "chrono",
  "futures",
- "once_cell",
  "prost",
  "prost-extend",
  "serde",
@@ -1239,12 +1238,12 @@ dependencies = [
 
 [[package]]
 name = "http-body-util"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793429d76616a256bcb62c2a2ec2bed781c8307e797e2598c50010f2bee2544f"
+checksum = "b021d93e26becf5dc7e1b75b1bed1fd93124b374ceb73f43d4d4eafec896a64a"
 dependencies = [
  "bytes",
- "futures-util",
+ "futures-core",
  "http",
  "http-body",
  "pin-project-lite",
@@ -1295,7 +1294,7 @@ version = "0.1.0"
 dependencies = [
  "http-body-util",
  "hyper",
- "tower 0.5.2",
+ "tower 0.5.1",
 ]
 
 [[package]]
@@ -1755,7 +1754,7 @@ dependencies = [
  "tokio-tungstenite",
  "tokio-util",
  "tower 0.4.13",
- "tower-http 0.5.2",
+ "tower-http",
  "tracing",
 ]
 
@@ -1804,7 +1803,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
- "tower 0.5.2",
+ "tower 0.5.1",
  "tracing",
 ]
 
@@ -1820,7 +1819,7 @@ dependencies = [
  "kube-forward",
  "openapi",
  "thiserror 1.0.69",
- "tower 0.5.2",
+ "tower 0.5.1",
  "url",
  "utils",
 ]
@@ -1917,9 +1916,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.169"
+version = "0.2.178"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
+checksum = "37c93d8daa9d8a012fd8ab92f088405fb202ea0b6ab73ee2482ae66af4f42091"
 
 [[package]]
 name = "libredox"
@@ -2166,8 +2165,8 @@ dependencies = [
  "serde_urlencoded",
  "tokio",
  "tokio-native-tls",
- "tower 0.5.2",
- "tower-http 0.6.2",
+ "tower 0.5.1",
+ "tower-http",
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
@@ -3029,6 +3028,7 @@ version = "1.0.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d434192e7da787e94a6ea7e9670b26a036d0ca41e0b7efb2676dd32bae872949"
 dependencies = [
+ "indexmap 2.7.1",
  "itoa",
  "memchr",
  "ryu",
@@ -3280,7 +3280,6 @@ dependencies = [
  "async-trait",
  "chrono",
  "clap",
- "constants",
  "downcast-rs",
  "flate2",
  "futures",
@@ -3293,7 +3292,6 @@ dependencies = [
  "k8s-openapi",
  "kube",
  "kube-proxy",
- "lazy_static",
  "once_cell",
  "openapi",
  "parse-size",
@@ -3305,7 +3303,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "tar",
- "tower 0.5.2",
+ "tower 0.5.1",
  "urlencoding",
  "utils",
  "uuid",
@@ -3332,6 +3330,12 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "sync_wrapper"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2047c6ded9c721764247e62cd3b03c09ffc529b2ba5b10ec482ae507a4a70160"
 
 [[package]]
 name = "sync_wrapper"
@@ -3479,9 +3483,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.43.1"
+version = "1.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "492a604e2fd7f814268a378409e6c92b5525d747d10db9a229723f55a417958c"
+checksum = "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779"
 dependencies = [
  "backtrace",
  "bytes",
@@ -3629,14 +3633,14 @@ dependencies = [
 
 [[package]]
 name = "tower"
-version = "0.5.2"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d039ad9159c98b70ecfd540b2573b97f7f52c3e8d9f8ad57a24b916a536975f9"
+checksum = "2873938d487c3cfb9aed7546dc9f2711d867c9f90c46b889989a2cb84eba6b4f"
 dependencies = [
  "futures-core",
  "futures-util",
  "pin-project-lite",
- "sync_wrapper",
+ "sync_wrapper 0.1.2",
  "tokio",
  "tokio-util",
  "tower-layer",
@@ -3656,24 +3660,6 @@ dependencies = [
  "http",
  "http-body",
  "http-body-util",
- "mime",
- "pin-project-lite",
- "tower-layer",
- "tower-service",
- "tracing",
-]
-
-[[package]]
-name = "tower-http"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "403fa3b783d4b626a8ad51d766ab03cb6d2dbfc46b1c5d4448395e6628dc9697"
-dependencies = [
- "base64 0.22.1",
- "bitflags 2.8.0",
- "bytes",
- "http",
- "http-body",
  "mime",
  "pin-project-lite",
  "tower-layer",
@@ -3890,7 +3876,6 @@ dependencies = [
  "console-logger",
  "constants",
  "flate2",
- "futures",
  "humantime",
  "k8s-openapi",
  "kube",
