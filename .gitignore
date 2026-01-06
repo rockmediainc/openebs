@@ -19,8 +19,8 @@ documentation/build/
 
 # Helm chart
 charts/Chart.lock
-!/charts/charts/openebs-crds/
 /charts/charts/*
+!/charts/charts/openebs-crds/
 
 # Build files
 **/target
